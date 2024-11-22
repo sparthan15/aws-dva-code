@@ -53,26 +53,41 @@ Use the lambda-apigateway-role as the execution role
 
 Add the following code:
 
-import * as AWS from '@aws-sdk/client-apigatewaymanagementapi'
-console.log('Loading function');
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import {
+    DynamoDBDocumentClient,
+    ScanCommand,
+    PutCommand,
+    GetCommand,
+    DeleteCommand,
+  } from "@aws-sdk/lib-dynamodb";
 
-const dynamo = new AWS.DynamoDB.DocumentClient();
+  console.log('Loading function');
+  const client = new DynamoDBClient({});
+  const dynamo = DynamoDBDocumentClient.from(client);
 
 /**
 
 Provide an event that contains the following keys:
 operation: one of the operations in the switch statement below
 tableName: required for operations that interact with DynamoDB
-payload: a parameter to pass to the operation being performed */ exports.handler = function(event, context, callback) { //console.log('Received event:', JSON.stringify(event, null, 2));
+payload: a parameter to pass to the operation being performed */ 
+export const handler = function(event, context, callback) { //console.log('Received event:', JSON.stringify(event, null, 2));
 var operation = event.operation;
 
 if (event.tableName) {
-    event.payload.TableName = event.tableName;
+    event.payload.tableName = event.tableName;
 }
 
 switch (operation) {
     case 'create':
-        dynamo.put(event.payload, callback);
+        //dynamo.put(event.payload, callback);
+          dynamo.send(
+          new PutCommand({
+            TableName: event.tableName,
+            Item: event.payload.Item,
+          })
+        );
         break;
     case 'read':
         dynamo.get(event.payload, callback);
