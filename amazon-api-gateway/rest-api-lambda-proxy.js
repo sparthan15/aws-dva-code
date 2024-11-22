@@ -1,7 +1,7 @@
 'use strict';
 console.log('Loading hello world function');
  
-exports.handler = async (event) => {
+export const handler = async (event) => {
     let name = "you";
     let city = 'World';
     let time = 'day';
